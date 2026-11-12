@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1b1208">
+<title>Xonlar jangi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#e6b422;--bg:#1b1208;--pn:rgba(38,24,10,.94);--bd:#8a5a2b;--tx:#f3e6c8;--mu:#bfa57a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#0d2a45;color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+canvas#game{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block;image-rendering:pixelated}
+.hidden{display:none!important}
+.px{font-family:"Press Start 2P",ui-monospace,monospace;letter-spacing:0}
+/* ---------- ekranlar ---------- */
+.screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:20;overflow:auto;padding:14px;
+ background:radial-gradient(ellipse at 50% 0%,#5a3a18 0,#2a1a0b 55%,#120a04 100%)}
+.screen.on{display:flex}
+.screen.glass{background:rgba(10,6,2,.78)}
+.card{width:min(560px,100%);margin:auto;background:var(--pn);border:3px solid var(--bd);border-radius:10px;padding:18px;box-shadow:0 0 0 3px #3b2410,0 12px 40px #000a}
+.card h2{margin:0 0 12px;color:var(--gold);font-size:15px;line-height:1.5;text-align:center}
+.logo{font-size:clamp(20px,6vw,34px);line-height:1.35;text-align:center;color:var(--gold);text-shadow:3px 3px 0 #7a1f12,6px 6px 0 #000a;margin:6px 0 4px}
+.tag{text-align:center;color:var(--mu);margin:0 0 14px;font-size:14px}
+.btn{display:block;width:100%;margin:8px 0;padding:13px 14px;font:700 16px system-ui,sans-serif;color:#2a1704;background:linear-gradient(#f4cf5a,#d79a1c);border:2px solid #6a420e;border-radius:8px;cursor:pointer;box-shadow:0 3px 0 #6a420e;text-align:center}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #6a420e}
+.btn.alt{background:linear-gradient(#6b4a28,#4a3018);color:var(--tx);border-color:#2a1a0b;box-shadow:0 3px 0 #2a1a0b}
+.btn.red{background:linear-gradient(#d9534a,#a32920);color:#fff;border-color:#5e130d;box-shadow:0 3px 0 #5e130d}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+label.f{display:block;margin:10px 0 4px;color:var(--mu);font-size:13px}
+input[type=text],input[type=password],input:not([type]),select{width:100%;padding:12px;border-radius:8px;border:2px solid #5a3a18;background:#150d05;color:var(--tx);font-size:16px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--gold)}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--gold)}
+.err{color:#ff8a7a;min-height:20px;font-size:14px;margin:6px 0;text-align:center}
+.ok{color:#9be08b}
+.langs{display:flex;gap:6px;justify-content:center;margin-bottom:10px}
+.langs button{flex:0 0 auto;padding:6px 12px;border-radius:6px;border:2px solid #5a3a18;background:#150d05;color:var(--tx);font-weight:700;cursor:pointer}
+.langs button.on{border-color:var(--gold);color:var(--gold)}
+.badge{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;background:#150d05;border:2px solid #5a3a18;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:14px}
+.badge .nm{font-weight:800;color:var(--gold);font-size:16px}
+.badge .ttl{color:#ffd86b}
+.facs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:520px){.facs{grid-template-columns:1fr}}
+.fac{display:flex;gap:10px;align-items:center;padding:10px;border:3px solid #3b2410;border-radius:8px;background:#150d05;cursor:pointer;min-height:72px}
+.fac .sw{width:34px;height:44px;border-radius:4px;border:2px solid #000;flex:0 0 auto;position:relative}
+.fac .sw:after{content:"";position:absolute;left:50%;top:6px;width:8px;height:8px;background:#ffffffaa;transform:translateX(-50%) rotate(45deg)}
+.fac b{display:block;font-size:15px}
+.fac small{color:var(--mu);display:block;font-size:12px;line-height:1.3}
+.fac .st{font-size:12px;margin-top:3px;font-weight:700}
+.fac.mine{border-color:var(--gold);background:#2d1d0c}
+.fac.taken{opacity:.6}
+.fac .mini{margin-left:auto;flex:0 0 auto;width:auto;padding:6px 10px;font-size:12px;margin-top:0;margin-bottom:0}
+.help{max-height:62vh;overflow:auto;font-size:14px;line-height:1.55}
+.help h3{color:var(--gold);margin:12px 0 4px;font-size:14px}
+.help li{margin:3px 0}
+.bar{height:16px;background:#150d05;border:2px solid #5a3a18;border-radius:8px;overflow:hidden;margin:14px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(#f4cf5a,#d79a1c);transition:width .25s}
+.big{font-size:clamp(18px,5vw,26px);text-align:center;margin:6px 0 10px;line-height:1.4}
+.gift{background:linear-gradient(#3b2a08,#241803);border:3px solid var(--gold);border-radius:10px;padding:12px;text-align:center;margin:10px 0;box-shadow:0 0 22px #e6b42266}
+.gift .crown{font-size:44px;line-height:1}
+.hint{color:var(--mu);font-size:13px;text-align:center;line-height:1.45;margin:8px 0}
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:8}
+#hud>*{pointer-events:auto}
+#topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:5px 8px;padding-top:max(5px,env(safe-area-inset-top));background:linear-gradient(#35200d,#1b1208);border-bottom:3px solid var(--bd);font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden}
+#topbar .r{display:flex;gap:4px;align-items:center;background:#150d05;border:2px solid #4a3018;border-radius:6px;padding:2px 8px;min-width:62px;justify-content:center}
+#topbar .sp{flex:1}
+#topbar .tm{color:var(--mu);font-weight:600}
+#topbar button,#mobtools button,#placebar button{pointer-events:auto;font-size:18px;background:#4a3018;border:2px solid #8a5a2b;border-radius:6px;color:var(--tx);padding:2px 10px;min-height:30px;cursor:pointer}
+#mini{position:absolute;left:6px;bottom:6px;width:180px;height:180px;image-rendering:pixelated;border:3px solid var(--bd);background:#000;border-radius:4px;touch-action:none}
+#panel{position:absolute;left:196px;right:6px;bottom:6px;min-height:112px;max-height:36vh;overflow:auto;background:var(--pn);border:3px solid var(--bd);border-radius:8px;padding:8px;display:flex;gap:10px;align-items:stretch;touch-action:pan-y}
+#panel .info{flex:0 0 190px;font-size:13px;line-height:1.4}
+#panel .info .t{display:flex;gap:8px;align-items:center}
+#panel .info .ic{font-size:34px;line-height:1}
+#panel .info b{font-size:15px;color:var(--gold)}
+.hpb{height:8px;background:#000;border:1px solid #5a3a18;border-radius:4px;overflow:hidden;margin:3px 0}
+.hpb i{display:block;height:100%;background:#4cc24c}
+.hpb i.lo{background:#e0b030}.hpb i.vlo{background:#d9453a}
+#panel .acts{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;align-content:start}
+.ab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:62px;padding:4px 2px;background:linear-gradient(#5a3d1e,#3a2610);border:2px solid #8a5a2b;border-radius:6px;color:var(--tx);cursor:pointer;font-size:11px;line-height:1.15;text-align:center}
+.ab:active{transform:translateY(1px)}
+.ab .ic{font-size:22px;line-height:1.1}
+.ab img.ic,.info img.ic{height:32px;width:auto;max-width:46px;image-rendering:pixelated;object-fit:contain}
+.ab .cs{font-size:10px;color:#ffe08a;white-space:nowrap}
+.ab.no{opacity:.5}.ab.no .cs{color:#ff8a7a}
+.ab.on{border-color:var(--gold);background:linear-gradient(#7a5a1e,#4a3510)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{display:inline-flex;gap:4px;align-items:center;background:#150d05;border:1px solid #5a3a18;border-radius:5px;padding:2px 6px;font-size:12px;cursor:pointer}
+.qrow{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.qi{position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:#150d05;border:2px solid #5a3a18;border-radius:5px;font-size:18px;cursor:pointer;overflow:hidden}
+.qi i{position:absolute;left:0;bottom:0;height:4px;background:var(--gold)}
+#notes{position:absolute;top:44px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:4px;align-items:center;pointer-events:none;width:min(92vw,460px)}
+#notes div{background:rgba(20,12,4,.9);border:2px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:14px;animation:nt 3.2s forwards;text-align:center}
+#notes div.bad{border-color:#d9453a;color:#ffb3a8}
+@keyframes nt{0%{opacity:0;transform:translateY(-6px)}8%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+#mobtools{position:absolute;right:6px;bottom:calc(var(--ph,130px) + 14px);display:none;flex-direction:column;gap:6px}
+#mobtools button{width:46px;height:46px;font-size:22px;padding:0}
+#mobtools button.on{border-color:var(--gold);background:#7a5a1e}
+#placebar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--ph,130px) + 14px);display:none;gap:12px}
+#placebar button{min-width:64px;min-height:50px;font-size:24px}
+#placebar .okb{background:#2f7a2c;border-color:#8bd37f}
+#selbox{position:fixed;border:1px solid #7cfc00;background:rgba(124,252,0,.12);pointer-events:none;z-index:7;display:none}
+@media(max-width:760px),(pointer:coarse){
+ #mini{left:6px;top:calc(44px + env(safe-area-inset-top));bottom:auto;width:104px;height:104px}
+ #panel{left:6px;max-height:34vh;min-height:100px;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+ #panel .info{flex:0 0 118px;font-size:12px}
+ #panel .info .ic{font-size:26px}
+ #panel .acts{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+ #mobtools{display:flex}
+ #topbar{font-size:12px;gap:5px}
+ #topbar .r{padding:2px 5px;min-width:0}
+ #topbar .tm{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="selbox"></div>
+
+<div id="hud" class="hidden">
+  <div id="topbar">
+    <span class="r">🍖 <span id="rf">0</span></span><span class="r">🪵 <span id="rw">0</span></span><span class="r">🪨 <span id="rs">0</span></span><span class="r">🪙 <span id="rg">0</span></span><span class="r">👥 <span id="rp">0/0</span></span>
+    <span class="sp"></span><span class="tm" id="tmr">0:00</span><button id="btnMenu">☰</button>
+  </div>
+  <canvas id="mini" width="96" height="96"></canvas>
+  <div id="notes"></div>
+  <div id="mobtools">
+    <button data-tool="box" id="toolBox" title="▢">▢</button>
+    <button data-tool="army">🛡</button>
+    <button data-tool="am" id="toolAm">⚔</button>
+    <button data-tool="none">✖</button>
+    <button data-tool="home">🏰</button>
+  </div>
+  <div id="placebar"><button class="okb" id="plOk">✔</button><button id="plNo">✖</button></div>
+  <div id="panel"></div>
+</div>
+
+<!-- Profil -->
+<div class="screen on" id="s-profile"><div class="card">
+  <div class="logo px" data-i18n="title">XONLAR JANGI</div>
+  <div class="langs" data-langs></div>
+  <h2 class="px" data-i18n="prof_title"></h2>
+  <label class="f" data-i18n="prof_name"></label><input id="inName" maxlength="16" autocomplete="off" autocapitalize="off">
+  <label class="f" data-i18n="prof_code"></label><input id="inCode" maxlength="32" type="password" autocomplete="off">
+  <div class="hint" data-i18n="prof_hint"></div>
+  <div class="err" id="profErr"></div>
+  <button class="btn" id="btnLogin" data-i18n="login"></button>
+</div></div>
+
+<!-- Asosiy menyu -->
+<div class="screen" id="s-menu"><div class="card">
+  <div class="logo px" data-i18n="title">XONLAR JANGI</div>
+  <p class="tag" data-i18n="tag"></p>
+  <div class="badge" id="profBadge"></div>
+  <button class="btn" id="mSolo" data-i18n="m_solo"></button>
+  <button class="btn" id="mOnline" data-i18n="m_online"></button>
+  <button class="btn alt" id="mHelp" data-i18n="m_help"></button>
+  <button class="btn alt" id="mSet" data-i18n="m_set"></button>
+  <button class="btn alt" id="mOut" data-i18n="m_out"></button>
+</div></div>
+
+<!-- Yakka o'yin -->
+<div class="screen" id="s-solo"><div class="card">
+  <h2 class="px" data-i18n="solo_t"></h2>
+  <label class="f" data-i18n="pick_khan"></label>
+  <div class="facs" id="soloFacs"></div>
+  <div class="row">
+    <div><label class="f" data-i18n="bots"></label><select id="soloBots"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option></select></div>
+    <div><label class="f" data-i18n="diff"></label><select id="soloDiff"><option value="0" data-i18n="d0"></option><option value="1" data-i18n="d1" selected></option><option value="2" data-i18n="d2"></option></select></div>
+  </div>
+  <button class="btn" id="soloStart" data-i18n="start"></button>
+  <button class="btn alt" data-go="s-menu" data-i18n="back"></button>
+</div></div>
+
+<!-- Onlayn -->
+<div class="screen" id="s-online"><div class="card">
+  <h2 class="px" data-i18n="on_t"></h2>
+  <label class="f" data-i18n="room"></label><input id="inRoom" maxlength="12" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:3px;text-align:center;font-weight:800">
+  <div class="hint" data-i18n="room_hint"></div>
+  <div class="err" id="onErr"></div>
+  <button class="btn" id="btnJoin" data-i18n="join"></button>
+  <button class="btn alt" data-go="s-menu" data-i18n="back"></button>
+</div></div>
+
+<!-- Lobbi -->
+<div class="screen" id="s-lobby"><div class="card">
+  <h2 class="px"><span data-i18n="lobby"></span>: <span id="lobCode" style="color:#fff"></span></h2>
+  <div class="hint" data-i18n="lob_info"></div>
+  <div class="facs" id="lobFacs"></div>
+  <div class="hint" id="lobInfo"></div>
+  <button class="btn" id="btnReady" data-i18n="ready"></button>
+  <button class="btn alt" id="btnLeave" data-i18n="leave"></button>
+</div></div>
+
+<!-- Sozlamalar -->
+<div class="screen" id="s-set"><div class="card">
+  <h2 class="px" data-i18n="set_t"></h2>
+  <label class="f" data-i18n="s_lang"></label><select id="setLang"><option value="uz">O'zbekcha</option><option value="ru">Русский</option><option value="en">English</option></select>
+  <label class="f" data-i18n="s_music"></label><input type="range" id="setMusic" min="0" max="100">
+  <label class="f" data-i18n="s_sfx"></label><input type="range" id="setSfx" min="0" max="100">
+  <label class="f" data-i18n="s_gfx"></label><select id="setGfx"><option value="0" data-i18n="g0"></option><option value="1" data-i18n="g1"></option><option value="2" data-i18n="g2"></option></select>
+  <label class="f row"><input type="checkbox" id="setEdge" style="flex:0 0 24px"><span data-i18n="s_edge" style="flex:1"></span></label>
+  <h2 class="px" style="margin-top:16px" data-i18n="s_acc"></h2>
+  <div class="badge" id="accInfo"></div>
+  <div class="row"><button class="btn alt" id="accSync" data-i18n="s_connect"></button><button class="btn alt" id="accOut" data-i18n="m_out"></button></div>
+  <div class="err" id="accMsg"></div>
+  <button class="btn" id="setBack" data-i18n="back"></button>
+</div></div>
+
+<!-- Yordam -->
+<div class="screen" id="s-help"><div class="card">
+  <h2 class="px" data-i18n="m_help"></h2>
+  <div class="help" id="helpBody"></div>
+  <button class="btn" data-go="s-menu" data-i18n="back"></button>
+</div></div>
+
+<!-- Yuklanish -->
+<div class="screen" id="s-load"><div class="card">
+  <div class="logo px" data-i18n="title">XONLAR JANGI</div>
+  <div class="hint" id="loadTxt" data-i18n="loading"></div>
+  <div class="bar"><i id="loadBar"></i></div>
+  <div class="hint" id="loadTip"></div>
+</div></div>
+
+<!-- Pauza -->
+<div class="screen glass" id="s-pause"><div class="card">
+  <h2 class="px" data-i18n="paused"></h2>
+  <button class="btn" id="pResume" data-i18n="resume"></button>
+  <button class="btn alt" id="pSet" data-i18n="m_set"></button>
+  <button class="btn red" id="pQuit" data-i18n="quit"></button>
+</div></div>
+
+<!-- Natija -->
+<div class="screen glass" id="s-result"><div class="card">
+  <div class="big px" id="resTitle"></div>
+  <div class="hint" id="resBody" style="font-size:15px"></div>
+  <div class="gift" id="resGift" style="display:none"></div>
+  <button class="btn" id="resBtn1"></button>
+  <button class="btn alt" id="resBtn2"></button>
+</div></div>
+
+<script src="sim.js"></script>
+<script src="sprites.js"></script>
+<script src="i18n.js"></script>
+<script src="client.js"></script>
+</body>
+</html>

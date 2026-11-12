@@ -1,0 +1,9 @@
+{
+  "name": "xonlar-jangi",
+  "version": "1.0.0",
+  "description": "Xonlar jangi — o'zbekcha real vaqtli strategiya (RTS) o'yini",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=16" },
+  "license": "MIT"
+}
